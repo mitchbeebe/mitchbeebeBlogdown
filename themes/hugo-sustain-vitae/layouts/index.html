@@ -1,0 +1,21 @@
+{{ partial "head" . }}
+  <body>
+    <div id="wrap">
+      {{ partial "header" . }}
+      <section id="about">
+        <div class="container">
+        <div class="avatar">
+          <img class="img-circle" src="{{ .Site.BaseURL }}img/{{ .Site.Params.avatar }}" alt="Responsive image">
+        </div>
+        <h3>My name is <strong>{{ .Site.Params.author }}</strong>.</h3>
+        <h3>I am a Data Scientist and passionate R programmer.</h3>
+        <h3>Have a look at some of my <a href="{{ .Site.BaseURL }}posts/">posts</a>.</h3>
+        <h3>For more, check out my <a href="{{ .Site.BaseURL }}vitae/">resume page</a> or download it <a href="{{ .Site.BaseURL }}img/{{ .Site.Params.resume }}">here</a>.</h3>
+        <h3>Contact me by <a href="mailto:{{ .Site.Params.Social.Email }}">email</a> or on <a href="http://linkedin.com/in/{{ .Site.Params.Social.LinkedIn }}">LinkedIn</a> .</h3>
+        {{ partial "social.html" . }}
+        </div>
+      </section>
+    </div>
+    {{ partial "footer" . }}
+  </body>
+</html>

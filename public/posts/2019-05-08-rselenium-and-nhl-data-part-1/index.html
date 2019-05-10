@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Mitch Beebe" />
+    <meta name="description" content="My personal website and blog">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Webscraping NHL Data with RSelenium, Part 1</title>
+    <meta name="generator" content="Hugo 0.40.3" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="/css/vitae-skeleton.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vitae-layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/sustain-main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/posts/">POSTS</a></li>
+        
+        <li><a href="/vitae/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/posts/2019-05-08-rselenium-and-nhl-data-part-1/">Webscraping NHL Data with RSelenium, Part 1</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          May 8, 2019
+            &nbsp;&nbsp;
+            
+            <span class="label label-success">R</span>
+            
+            <span class="label label-success">webscraping</span>
+            
+            <span class="label label-success">Selenium</span>
+            
+            <span class="label label-success">NHL</span>
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>I love hockey. I also love data science. What’s better than merging the two and learn how to use RSelenium in the process?</p>
+<p>A while ago, I wrote some web-scraping <a href="https://github.com/mitchbeebe/nhlStandings">code</a> to find the NHL standings as of Novermber 1st (roughtly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website <em>dropyourgloves.com</em> had convenient and uniform URLs to simply combine season and date strings to create a valid URL to scrape the corresponding HTML table. Unfortunately, the website no longer exists!</p>
+<p>After some Google-Fu, I was unable to find a replacement website, however, I found <a href="http://www.shrpsports.com">shrpsports.com</a>, which has an easy-to-use dropdown UI, submit bottons, and resulting HTML table. This isn’t as easy as find and replace in the code, so I needed to load RSelenium for automating the browser to populate dropdowns and click submit.</p>
+<p>I found that the preferred way to run RSelenium is via a headless browser running in Docker. This was the first case I found myself needing either technology. I still have work to do to write more robust code, but I got this working, so I wanted to post about it.</p>
+<p><strong>Set up Docker</strong></p>
+<ul>
+<li>First, I downloaded Docker <a href="https://www.docker.com/products/docker-desktop">here</a></li>
+<li>To start a headless browser, I ran <code>docker run -d -p 4445:4444 selenium/standalone-chrome</code> (the first time pulls the Docker image from DockerHub)</li>
+</ul>
+<p><strong>Connecting to the browser</strong></p>
+<p>The R code below begins the webscraping journey.</p>
+<pre class="r"><code># Import packages
+library(RSelenium)
+library(rvest)
+library(tidyverse)
+library(glue)
+library(knitr)
+library(kableExtra)
+
+# Access the remote browser
+remDr &lt;- RSelenium::remoteDriver(remoteServerAddr = &quot;localhost&quot;,
+                                 port = 4445L,
+                                 browserName = &quot;chrome&quot;)
+
+# Initialize a browsing session
+remDr$open(silent = TRUE)</code></pre>
+<p><strong>Scrape NHL Standings</strong></p>
+<p>Now for the fun part. I wrote this function to fetch standings from the remote browser for any season and date or for season-end standings. There are a few pitfalls of this function regarding the NHL changing playoff format, conference assignments, etc. that will take quite a bit of elbow grease for a truly robust function, so I’ll save that for another time. I also noticed a few data consistency issues, but hey, it’s a free site from which I’m pulling data.</p>
+<p>For the timebeing, this function simply returns the Eastern, Western, and Stanley Cup match-up, if fetching the season-end standings. In a future post, I hope to try the analysis of “Does a strong start to the season predict not only a playoff berth, but also playoff success?” Having this function will allow for that to happen with far less repetitive programming.</p>
+<pre class="r"><code>getStandings &lt;- function(season, month, date) {
+  # Gets the NHL standings for any season on any date or final conference standings
+  #
+  # Args:
+  #   season: Four-character string representing the NHL season (year in which Stanley
+  #     Cup is played for the season, e.g. &quot;2018&quot; is for the 2017-18 season)
+  #   month (optional): Three-character month abbreviation
+  #   date (optional): Character representing day of the month (e.g. &quot;1&quot;, &quot;12&quot;, &quot;27&quot;)
+  #
+  # Returns:
+  #   The NHL standings in a dataframe
+  
+  # Enter the URL for the browser
+  remDr$navigate(&quot;http://www.shrpsports.com/nhl/stand.htm&quot;) 
+  
+  # Save the homepage HTML to reuse in several 
+  homepage &lt;- read_html(remDr$getPageSource()[[1]])
+  
+  # Get seasons from dropdown
+  valid_seasons &lt;- homepage %&gt;% 
+    html_nodes(&quot;select[name=&#39;season&#39;]&quot;) %&gt;% 
+    html_children() %&gt;% 
+    html_attr(&quot;value&quot;)
+  
+  # Get months from dropdown
+  valid_mos &lt;- homepage %&gt;% 
+    html_nodes(&quot;select[name=&#39;month&#39;]&quot;) %&gt;% 
+    html_children() %&gt;% 
+    html_attr(&quot;value&quot;)
+  
+  # Get days of month from dropdown
+  valid_dates &lt;- homepage %&gt;% 
+    html_nodes(&quot;select[name=&#39;date&#39;]&quot;) %&gt;% 
+    html_children() %&gt;% 
+    html_attr(&quot;value&quot;)
+  
+  # Verify season input
+  if (!(season %in% valid_seasons)) stop(&quot;Invalid season&quot;)
+  
+  # Determine if user wants final standings or standings as of a date
+  if (missing(month) | missing(date)) {
+    div_conf &lt;- &quot;latefincnf&quot;
+    month &lt;- &quot;&quot;
+    date &lt;- &quot;&quot;
+    message(&quot;Getting season-end standings...&quot;)
+  } else {
+    if (!(month %in% valid_mos)) stop(&quot;Invalid month&quot;)
+    if (!(date %in% valid_dates)) stop(&quot;Invalid date&quot;)
+    div_conf &lt;- &quot;cnf&quot;
+    message(glue(&quot;Getting standings as of {month}-{date}...&quot;))
+  }
+  
+  # Select season input in dropdown
+  season &lt;- remDr$findElement(using = &#39;css selector&#39;, 
+                              glue(&quot;select[name=&#39;season&#39;] option[value=&#39;{season}&#39;]&quot;))
+  season$clickElement()
+  
+  # Select division/conference in dropdown
+  divcnf &lt;- remDr$findElement(using = &#39;css selector&#39;, 
+                              glue(&quot;select[name=&#39;divcnf&#39;] option[value=&#39;{div_conf}&#39;]&quot;))
+  divcnf$clickElement()
+  
+  # Select month in dropdown
+  month &lt;- remDr$findElement(using = &#39;css selector&#39;, 
+                             glue(&quot;select[name=&#39;month&#39;] option[value=&#39;{month}&#39;]&quot;))
+  month$clickElement()
+  
+  # Select day of month in dropdown
+  dom &lt;- remDr$findElement(using = &#39;css selector&#39;, 
+                           glue(&quot;select[name=&#39;date&#39;] option[value=&#39;{date}&#39;]&quot;))
+  dom$clickElement()
+  
+  # Click submit botton
+  submit &lt;- remDr$findElement(using = &#39;css selector&#39;, &quot;input[type=&#39;submit&#39;]&quot;)
+  submit$clickElement()
+  
+  # NOT RUN: This will take a screenshot of the current remote browser
+  #   screen and display it in the RStudio viewer
+  # remDr$screenshot(display = TRUE) 
+  
+  # Read the HTML table from resulting webpage
+  raw_table &lt;- read_html(remDr$getPageSource()[[1]]) %&gt;% 
+    html_table(fill = TRUE) %&gt;% 
+    .[[3]]
+  
+  # Names are stored in the second row, so rename the table accordingly
+  names(raw_table) &lt;- raw_table[2,]
+  
+  # Clean up column name holding the NHL team name and remove excess rows
+  raw_table &lt;- raw_table %&gt;% 
+    rename(Team = &quot;&quot;) %&gt;% 
+    filter(Team != &quot;&quot;) %&gt;% 
+    rename_all(~str_replace_all(.,&quot;\\-&quot;, &quot;\\_&quot;))
+  
+  # Index the rows of the table holding Conference subheadings
+  conf_idx &lt;- raw_table$Team %&gt;% 
+    grep(&quot;conf&quot;, ., ignore.case = TRUE)
+  
+  # Store all Eastern conference results in a dataframe
+  east &lt;- raw_table %&gt;% 
+    slice(1:(conf_idx[2] - 1)) %&gt;% 
+    filter(!str_detect(Team, regex(&quot;conf&quot;, ignore_case = TRUE))) %&gt;% 
+    mutate(place = row_number(),
+           Team = str_trim(str_replace(Team, &quot;\\*|\\d&quot;, &quot;&quot;)),
+           playoffs = if_else(place &lt;= 8, TRUE, FALSE))
+  
+  # Store all Western conference results in another dataframe
+  west &lt;- raw_table %&gt;% 
+    slice(conf_idx[2]:n()) %&gt;% 
+    filter(!str_detect(Team, regex(&quot;conf&quot;, ignore_case = TRUE))) %&gt;% 
+    mutate(place = row_number(),
+           Team = str_trim(str_replace(Team, &quot;\\*|\\d&quot;, &quot;&quot;)),
+           playoffs = if_else(place &lt;= 8, TRUE, FALSE))
+  
+  # If user wants final conference standings, also get Stanley Cup match
+  if (div_conf == &quot;latefincnf&quot;) {
+    
+    sc_match &lt;- read_html(remDr$getPageSource()[[1]]) %&gt;%
+      html_table(fill = TRUE) %&gt;%
+      tail(1) %&gt;%
+      .[[1]] %&gt;% 
+      filter(!str_detect(X1, regex(&quot;cup&quot;, ignore_case = TRUE))) %&gt;%
+      mutate(X1 = str_remove_all(X1, &quot;[\\d\\-]&quot;) %&gt;% 
+               str_remove(&quot;\\w+$&quot;) %&gt;% 
+               str_trim()) %&gt;%
+      separate(X1, c(&quot;Winner&quot;, &quot;Loser&quot;), &quot;  &quot;)
+    
+  }
+  
+  return(
+    list(eastern = east,
+         western = west,
+         stanley_cup = if (exists(&quot;sc_match&quot;)) sc_match else NA)
+  )
+  
+}</code></pre>
+<p>Below are sample results of running the function. Looks like it works for season-end standings!</p>
+<pre class="r"><code># Let&#39;s get the season-end Eastern standings for the 2016 season
+getStandings(&quot;2016&quot;)$eastern %&gt;% 
+  kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;),
+                full_width = FALSE, font_size = 12)</code></pre>
+<pre><code>## Getting season-end standings...</code></pre>
+<table class="table table-striped table-hover table-condensed table-responsive" style="font-size: 12px; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Team
+</th>
+<th style="text-align:left;">
+W_L_OT
+</th>
+<th style="text-align:left;">
+ROW
+</th>
+<th style="text-align:left;">
+Pts
+</th>
+<th style="text-align:left;">
+GF
+</th>
+<th style="text-align:left;">
+GA
+</th>
+<th style="text-align:left;">
+Home
+</th>
+<th style="text-align:left;">
+Away
+</th>
+<th style="text-align:left;">
+Div
+</th>
+<th style="text-align:left;">
+Cnf
+</th>
+<th style="text-align:left;">
+Icf
+</th>
+<th style="text-align:right;">
+place
+</th>
+<th style="text-align:left;">
+playoffs
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Washington
+</td>
+<td style="text-align:left;">
+56-18-8
+</td>
+<td style="text-align:left;">
+52
+</td>
+<td style="text-align:left;">
+120
+</td>
+<td style="text-align:left;">
+252
+</td>
+<td style="text-align:left;">
+193
+</td>
+<td style="text-align:left;">
+29-8-4
+</td>
+<td style="text-align:left;">
+27-10-4
+</td>
+<td style="text-align:left;">
+20-5-5
+</td>
+<td style="text-align:left;">
+39-10-5
+</td>
+<td style="text-align:left;">
+17-8-3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Pittsburgh
+</td>
+<td style="text-align:left;">
+48-26-8
+</td>
+<td style="text-align:left;">
+44
+</td>
+<td style="text-align:left;">
+104
+</td>
+<td style="text-align:left;">
+245
+</td>
+<td style="text-align:left;">
+203
+</td>
+<td style="text-align:left;">
+26-11-4
+</td>
+<td style="text-align:left;">
+22-15-4
+</td>
+<td style="text-align:left;">
+19-9-2
+</td>
+<td style="text-align:left;">
+34-15-5
+</td>
+<td style="text-align:left;">
+14-11-3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Florida
+</td>
+<td style="text-align:left;">
+47-26-9
+</td>
+<td style="text-align:left;">
+40
+</td>
+<td style="text-align:left;">
+103
+</td>
+<td style="text-align:left;">
+239
+</td>
+<td style="text-align:left;">
+203
+</td>
+<td style="text-align:left;">
+25-11-5
+</td>
+<td style="text-align:left;">
+22-15-4
+</td>
+<td style="text-align:left;">
+20-9-1
+</td>
+<td style="text-align:left;">
+35-13-6
+</td>
+<td style="text-align:left;">
+12-13-3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NY Rangers
+</td>
+<td style="text-align:left;">
+46-27-9
+</td>
+<td style="text-align:left;">
+43
+</td>
+<td style="text-align:left;">
+101
+</td>
+<td style="text-align:left;">
+236
+</td>
+<td style="text-align:left;">
+217
+</td>
+<td style="text-align:left;">
+27-10-4
+</td>
+<td style="text-align:left;">
+19-17-5
+</td>
+<td style="text-align:left;">
+14-11-5
+</td>
+<td style="text-align:left;">
+30-18-6
+</td>
+<td style="text-align:left;">
+16-9-3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NY Islanders
+</td>
+<td style="text-align:left;">
+45-27-10
+</td>
+<td style="text-align:left;">
+40
+</td>
+<td style="text-align:left;">
+100
+</td>
+<td style="text-align:left;">
+232
+</td>
+<td style="text-align:left;">
+216
+</td>
+<td style="text-align:left;">
+25-11-5
+</td>
+<td style="text-align:left;">
+20-16-5
+</td>
+<td style="text-align:left;">
+18-8-4
+</td>
+<td style="text-align:left;">
+26-20-8
+</td>
+<td style="text-align:left;">
+19-7-2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tampa Bay
+</td>
+<td style="text-align:left;">
+46-31-5
+</td>
+<td style="text-align:left;">
+43
+</td>
+<td style="text-align:left;">
+97
+</td>
+<td style="text-align:left;">
+227
+</td>
+<td style="text-align:left;">
+201
+</td>
+<td style="text-align:left;">
+25-13-3
+</td>
+<td style="text-align:left;">
+21-18-2
+</td>
+<td style="text-align:left;">
+15-12-3
+</td>
+<td style="text-align:left;">
+30-21-3
+</td>
+<td style="text-align:left;">
+16-10-2
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Philadelphia
+</td>
+<td style="text-align:left;">
+41-27-14
+</td>
+<td style="text-align:left;">
+38
+</td>
+<td style="text-align:left;">
+96
+</td>
+<td style="text-align:left;">
+214
+</td>
+<td style="text-align:left;">
+218
+</td>
+<td style="text-align:left;">
+23-10-8
+</td>
+<td style="text-align:left;">
+18-17-6
+</td>
+<td style="text-align:left;">
+14-10-6
+</td>
+<td style="text-align:left;">
+27-16-11
+</td>
+<td style="text-align:left;">
+14-11-3
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Detroit
+</td>
+<td style="text-align:left;">
+41-30-11
+</td>
+<td style="text-align:left;">
+39
+</td>
+<td style="text-align:left;">
+93
+</td>
+<td style="text-align:left;">
+211
+</td>
+<td style="text-align:left;">
+224
+</td>
+<td style="text-align:left;">
+22-13-6
+</td>
+<td style="text-align:left;">
+19-17-5
+</td>
+<td style="text-align:left;">
+17-10-3
+</td>
+<td style="text-align:left;">
+26-20-8
+</td>
+<td style="text-align:left;">
+15-10-3
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Boston
+</td>
+<td style="text-align:left;">
+42-31-9
+</td>
+<td style="text-align:left;">
+38
+</td>
+<td style="text-align:left;">
+93
+</td>
+<td style="text-align:left;">
+240
+</td>
+<td style="text-align:left;">
+230
+</td>
+<td style="text-align:left;">
+17-18-6
+</td>
+<td style="text-align:left;">
+25-13-3
+</td>
+<td style="text-align:left;">
+18-10-2
+</td>
+<td style="text-align:left;">
+31-17-6
+</td>
+<td style="text-align:left;">
+11-14-3
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Carolina
+</td>
+<td style="text-align:left;">
+35-31-16
+</td>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+86
+</td>
+<td style="text-align:left;">
+198
+</td>
+<td style="text-align:left;">
+226
+</td>
+<td style="text-align:left;">
+19-15-7
+</td>
+<td style="text-align:left;">
+16-16-9
+</td>
+<td style="text-align:left;">
+13-10-7
+</td>
+<td style="text-align:left;">
+21-22-11
+</td>
+<td style="text-align:left;">
+14-9-5
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ottawa
+</td>
+<td style="text-align:left;">
+38-35-9
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+85
+</td>
+<td style="text-align:left;">
+236
+</td>
+<td style="text-align:left;">
+247
+</td>
+<td style="text-align:left;">
+21-14-6
+</td>
+<td style="text-align:left;">
+17-21-3
+</td>
+<td style="text-align:left;">
+16-12-2
+</td>
+<td style="text-align:left;">
+22-26-6
+</td>
+<td style="text-align:left;">
+16-9-3
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+New Jersey
+</td>
+<td style="text-align:left;">
+38-36-8
+</td>
+<td style="text-align:left;">
+36
+</td>
+<td style="text-align:left;">
+84
+</td>
+<td style="text-align:left;">
+184
+</td>
+<td style="text-align:left;">
+208
+</td>
+<td style="text-align:left;">
+19-17-5
+</td>
+<td style="text-align:left;">
+19-19-3
+</td>
+<td style="text-align:left;">
+11-16-3
+</td>
+<td style="text-align:left;">
+22-25-7
+</td>
+<td style="text-align:left;">
+16-11-1
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Montreal
+</td>
+<td style="text-align:left;">
+38-38-6
+</td>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+82
+</td>
+<td style="text-align:left;">
+221
+</td>
+<td style="text-align:left;">
+236
+</td>
+<td style="text-align:left;">
+22-16-3
+</td>
+<td style="text-align:left;">
+16-22-3
+</td>
+<td style="text-align:left;">
+18-11-1
+</td>
+<td style="text-align:left;">
+31-20-3
+</td>
+<td style="text-align:left;">
+7-18-3
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Buffalo
+</td>
+<td style="text-align:left;">
+35-36-11
+</td>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+81
+</td>
+<td style="text-align:left;">
+201
+</td>
+<td style="text-align:left;">
+222
+</td>
+<td style="text-align:left;">
+16-19-6
+</td>
+<td style="text-align:left;">
+19-17-5
+</td>
+<td style="text-align:left;">
+11-14-5
+</td>
+<td style="text-align:left;">
+23-25-6
+</td>
+<td style="text-align:left;">
+12-11-5
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Columbus
+</td>
+<td style="text-align:left;">
+34-40-8
+</td>
+<td style="text-align:left;">
+28
+</td>
+<td style="text-align:left;">
+76
+</td>
+<td style="text-align:left;">
+219
+</td>
+<td style="text-align:left;">
+252
+</td>
+<td style="text-align:left;">
+18-17-6
+</td>
+<td style="text-align:left;">
+16-23-2
+</td>
+<td style="text-align:left;">
+11-16-3
+</td>
+<td style="text-align:left;">
+20-27-7
+</td>
+<td style="text-align:left;">
+14-13-1
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Toronto
+</td>
+<td style="text-align:left;">
+29-42-11
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:left;">
+69
+</td>
+<td style="text-align:left;">
+198
+</td>
+<td style="text-align:left;">
+246
+</td>
+<td style="text-align:left;">
+14-18-9
+</td>
+<td style="text-align:left;">
+15-24-2
+</td>
+<td style="text-align:left;">
+5-18-7
+</td>
+<td style="text-align:left;">
+15-29-10
+</td>
+<td style="text-align:left;">
+14-13-1
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s see how my Detroit Red Wings were doing on the day I was born…</p>
+<pre class="r"><code>drw &lt;- getStandings(&quot;1993&quot;, &quot;Feb&quot;, &quot;14&quot;)$western %&gt;% 
+  filter(Team == &quot;Detroit&quot;)</code></pre>
+<pre><code>## Getting standings as of Feb-14...</code></pre>
+<pre class="r"><code>drw %&gt;% 
+  kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;hover&quot;, &quot;condensed&quot;, &quot;responsive&quot;),
+                full_width = FALSE, font_size = 12)</code></pre>
+<table class="table table-striped table-hover table-condensed table-responsive" style="font-size: 12px; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Team
+</th>
+<th style="text-align:left;">
+W_L_T
+</th>
+<th style="text-align:left;">
+Pts
+</th>
+<th style="text-align:left;">
+GF
+</th>
+<th style="text-align:left;">
+GA
+</th>
+<th style="text-align:left;">
+Home
+</th>
+<th style="text-align:left;">
+Away
+</th>
+<th style="text-align:left;">
+Div
+</th>
+<th style="text-align:left;">
+Cnf
+</th>
+<th style="text-align:left;">
+Icf
+</th>
+<th style="text-align:right;">
+place
+</th>
+<th style="text-align:left;">
+playoffs
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Detroit
+</td>
+<td style="text-align:left;">
+31-21-7
+</td>
+<td style="text-align:left;">
+69
+</td>
+<td style="text-align:left;">
+254
+</td>
+<td style="text-align:left;">
+201
+</td>
+<td style="text-align:left;">
+18-11-2
+</td>
+<td style="text-align:left;">
+13-10-5
+</td>
+<td style="text-align:left;">
+10-12-3
+</td>
+<td style="text-align:left;">
+17-14-6
+</td>
+<td style="text-align:left;">
+14-7-1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+</tr>
+</tbody>
+</table>
+<p>A record of 31-21-7…not bad.</p>
+<p>That’s it for now, thanks for reading. Hopefully more to come on this.</p>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+                  <div class="row">
+                    <div class="col-sm-4 col-md-4 col-lg-4">
+                      <h6 style="text-align: right">
+                        May 7, 2019
+                      </h6>
+                    </div>
+                    <div class="col-sm-8 col-md-8 col-lg-8">
+                      <h6 style="text-align: left">
+                        <strong><a href="/posts/2019-05-07-hello_world/">Hello World</a></strong>
+                      </h6>
+                    </div>
+                  </div>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="https://github.com/anirbanmu/hugo-sustain-vitae">sustain-vitae</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+
+  </body>
+</html>

@@ -1,0 +1,21 @@
+name: Employment
+source:
+  - prof: Data Scientist
+    place: JPMorgan Chase & Co.
+    time: Feb 2018 to Present
+    #description: Lorem ipsum dolor sit amet, his et viris petentium philosophia, at vix debitis deleniti. At vis velit volumus alienum, agam vocent assueverit usu ex.
+
+  - prof: Senior Analyst, Customer Targeting
+    place: Luxottica Retail
+    time: Dec 2015 to Feb 2018
+    #description: Qui bonorum menandri intellegebat ex, mel quando oblique an. Et eam virtute debitis philosophia, unum ancillae disputationi vim in. Ipsum vidisse meliore ex eum, delectus tacimates conclusionemque has ei. Eam ubique cetero scribentur ne.
+
+  - prof: R&D Analytics Intern
+    place: Nationwide Insurance
+    time: Summer 2015
+    #description: Latine bonorum deserunt at nam. Mea nisl officiis eu, propriae similique has te, mei an brute meliore electram. Quo admodum omittantur ei, etiam principes at eos. Sit vocent commodo ceteros in, at mel idque everti.
+  
+  - prof: Predictive Analytics Intern
+    place: Luxottica Retail
+    time: Summer 2014
+    #description: Mucius sententiae et mei, nec an diam ignota, tale epicurei intellegebat ne sit. Sumo pertinacia contentiones duo ei.

@@ -1,4 +1,4 @@
-baseurl = "https://mitchbeebe.com/"
+baseurl = "https://www.mitchbeebe.com/"
 languageCode = "en-US"
 title = "Mitch Beebe"
 # Enable comments by entering your Disqus shortname
@@ -27,8 +27,8 @@ ignoreFiles = ["\\*.Rmd$"]
   LinkedIn      = "mitchbeebe"
 
 [params.vitae]
-  website = "mitchbeebe.com"
-  website_full = "https://mitchbeebe.com/"
+  website = "www.mitchbeebe.com"
+  website_full = "https://www.mitchbeebe.com/"
   city = "New York, NY"
 
 ## Main Menu

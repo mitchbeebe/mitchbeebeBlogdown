@@ -38,13 +38,29 @@ remDr <- RSelenium::remoteDriver(remoteServerAddr = "localhost",
 
 # Initialize a browsing session
 remDr$open(silent = TRUE)
+
+# Navigate to the website to scrape
+remDr$navigate("http://www.shrpsports.com/nhl/stand.htm") 
+
+# Save a screenshot and display below
+remDr$screenshot(file = "screenshot.png")
 ```
+
+---
+
+Here's what the website looks like:
+
+---
+
+![](/posts/screenshot.png){width=100% height=100%}
+
+---
 
 **Scrape NHL Standings**
 
 Now for the fun part. I wrote this function to fetch standings from the remote browser for any season and date or for season-end standings. There are a few pitfalls of this function regarding the NHL changing playoff format, conference assignments, etc. that will take quite a bit of elbow grease for a truly robust function, so I'll save that for another time. I also noticed a few data consistency issues, but hey, it's a free site from which I'm pulling data. 
 
-For the timebeing, this function simply returns the Eastern, Western, and Stanley Cup match-up, if fetching the season-end standings. In a future post, I hope to try the analysis of "Does a strong start to the season predict not only a playoff berth, but also playoff success?" Having this function will allow for that to happen with far less repetitive programming.
+For the timebeing, this function simply returns the Eastern, Western, and, if pulling season-end standings, the Stanley Cup match-up. In a future post, I hope to try the analysis of "Does a strong start to the season predict not only a playoff berth, but also playoff success?" Having this function will allow for that to happen with far less repetitive programming.
 
 ```{r message=FALSE, warning=FALSE}
 getStandings <- function(season, month, date) {
@@ -209,7 +225,7 @@ drw %>%
                 full_width = FALSE, font_size = 12)
 ```
 
-A record of `r drw$W_L_T`...not bad.
+A record of `r drw$W_L_T`...not bad. Fun fact, `r getStandings("1993")$stanley_cup$Winner` won the cup that year.
 
 
 That's it for now, thanks for reading. Hopefully more to come on this.

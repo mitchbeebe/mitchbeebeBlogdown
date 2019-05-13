@@ -111,10 +111,24 @@ remDr &lt;- RSelenium::remoteDriver(remoteServerAddr = &quot;localhost&quot;,
                                  browserName = &quot;chrome&quot;)
 
 # Initialize a browsing session
-remDr$open(silent = TRUE)</code></pre>
+remDr$open(silent = TRUE)
+
+# Navigate to the website to scrape
+remDr$navigate(&quot;http://www.shrpsports.com/nhl/stand.htm&quot;) 
+
+# Save a screenshot and display below
+remDr$screenshot(file = &quot;screenshot.png&quot;)</code></pre>
+<hr />
+<p>Here’s what the website looks like:</p>
+<hr />
+<div class="figure">
+<img src="/posts/screenshot.png" style="width:100.0%" style="height:100.0%" />
+
+</div>
+<hr />
 <p><strong>Scrape NHL Standings</strong></p>
 <p>Now for the fun part. I wrote this function to fetch standings from the remote browser for any season and date or for season-end standings. There are a few pitfalls of this function regarding the NHL changing playoff format, conference assignments, etc. that will take quite a bit of elbow grease for a truly robust function, so I’ll save that for another time. I also noticed a few data consistency issues, but hey, it’s a free site from which I’m pulling data.</p>
-<p>For the timebeing, this function simply returns the Eastern, Western, and Stanley Cup match-up, if fetching the season-end standings. In a future post, I hope to try the analysis of “Does a strong start to the season predict not only a playoff berth, but also playoff success?” Having this function will allow for that to happen with far less repetitive programming.</p>
+<p>For the timebeing, this function simply returns the Eastern, Western, and, if pulling season-end standings, the Stanley Cup match-up. In a future post, I hope to try the analysis of “Does a strong start to the season predict not only a playoff berth, but also playoff success?” Having this function will allow for that to happen with far less repetitive programming.</p>
 <pre class="r"><code>getStandings &lt;- function(season, month, date) {
   # Gets the NHL standings for any season on any date or final conference standings
   #
@@ -1051,7 +1065,7 @@ TRUE
 </tr>
 </tbody>
 </table>
-<p>A record of 31-21-7…not bad.</p>
+<p>A record of 31-21-7…not bad. Fun fact, Montreal won the cup that year.</p>
 <p>That’s it for now, thanks for reading. Hopefully more to come on this.</p>
 
               <hr>

@@ -2,34 +2,34 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>R on Mitch Beebe</title>
-    <link>https://mitchbeebe.com/tags/r/</link>
+    <link>/tags/r/</link>
     <description>Recent content in R on Mitch Beebe</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
     <lastBuildDate>Wed, 08 May 2019 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://mitchbeebe.com/tags/r/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Webscraping NHL Data with RSelenium, Part 1</title>
-      <link>https://mitchbeebe.com/posts/2019-05-08-rselenium-and-nhl-data-part-1/</link>
+      <link>/posts/2019-05-08-rselenium-and-nhl-data-part-1/</link>
       <pubDate>Wed, 08 May 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://mitchbeebe.com/posts/2019-05-08-rselenium-and-nhl-data-part-1/</guid>
+      <guid>/posts/2019-05-08-rselenium-and-nhl-data-part-1/</guid>
       <description>I love hockey. I also love data science. What’s better than merging the two and learn how to use RSelenium in the process?
-A while ago, I wrote some web-scraping code to find the NHL standings as of Novermber 1st (roughtly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website dropyourgloves.</description>
+A while ago, I wrote some web-scraping code to find the NHL standings as of Novermber 1st (roughly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website dropyourgloves.</description>
     </item>
     
     <item>
       <title>Hello World</title>
-      <link>https://mitchbeebe.com/posts/2019-05-07-hello_world/</link>
+      <link>/posts/2019-05-07-hello_world/</link>
       <pubDate>Tue, 07 May 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://mitchbeebe.com/posts/2019-05-07-hello_world/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-When you click the Knit button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min.</description>
+      <guid>/posts/2019-05-07-hello_world/</guid>
+      <description>R Markdown This is my first post! This website was developed with R Markdown, Blogdown, Hugo, and served via Netlify. I tried hosting this on GitHub Pages, but had difficulty with Jekyll and the R Markdown format. Having read about Blogdown, I’m making the transition.
+So far this is great. I can embed R code like this:
+summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.</description>
     </item>
     
   </channel>

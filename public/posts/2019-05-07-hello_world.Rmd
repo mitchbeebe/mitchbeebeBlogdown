@@ -5,22 +5,18 @@ categories: ["R"]
 tags: ["R"]
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is my first post! This website was developed with R Markdown, Blogdown, Hugo, and served via Netlify. I tried hosting this on GitHub Pages, but had difficulty with Jekyll and the R Markdown format. Having read about Blogdown, I'm making the transition.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+So far this is great. I can embed R code like this:
 
 ```{r cars}
 summary(cars)
 ```
 
 
-## Including Plots
+Or include plots:
 
 ```{r sky}
 pie(
@@ -30,4 +26,17 @@ pie(
   init.angle = -50, border = NA
 )
 ```
+
+---
+
+
+I don't anticipate blogging a lot, but I hope to make this a platform to showcase some of my pet projects. Fair warning, a lot of my projects revolve on my dog, Harper, so I literally mean "pet". Below are a few examples I hope to post about soon:
+
+* Raspberry Pi timelapse video of Harper crate-training
+* Harper/Not Harper image classification mobile app
+* Harper autoencoder to generate new, "fake" Harper images
+
+---
+
+![Thanks for reading!](/img/harper.jpg){width=100% height=100%}
 

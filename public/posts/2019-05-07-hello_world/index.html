@@ -6,16 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Mitch Beebe" />
     <meta name="description" content="My personal website and blog">
-    <link rel="shortcut icon" type="image/x-icon" href="https://mitchbeebe.com/img/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
     <title>Hello World</title>
     <meta name="generator" content="Hugo 0.40.3" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-    <link rel="stylesheet" type="text/css" href="https://mitchbeebe.com/css/vitae-skeleton.css" />
-    <link rel="stylesheet" type="text/css" href="https://mitchbeebe.com/css/vitae-layout.css" />
-    <link rel="stylesheet" type="text/css" href="https://mitchbeebe.com/css/sustain-main.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vitae-skeleton.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vitae-layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/sustain-main.css" />
+    <link rel="stylesheet" href="/css/tomorrow-night-eighties.css" rel="stylesheet" id="theme-stylesheet">
+    <script src="/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <link rel="stylesheet" href="/css/tomorrow-night-eighties">
     
     <!--[if lt IE 9]>
 			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -32,7 +37,7 @@
       <nav class="navbar navbar-default">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="https://mitchbeebe.com/"><i class="fa fa-home"></i></a>
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -57,7 +62,7 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="https://mitchbeebe.com/posts/2019-05-07-hello_world/">Hello World</a></strong>
+            <strong><a href="/posts/2019-05-07-hello_world/">Hello World</a></strong>
           </h3>
         </div>
         <div class="blog-title">
@@ -74,8 +79,8 @@
             <div class="blogpost">
               <div id="r-markdown" class="section level2">
 <h2>R Markdown</h2>
-<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<p>This is my first post! This website was developed with R Markdown, Blogdown, Hugo, and served via Netlify. I tried hosting this on GitHub Pages, but had difficulty with Jekyll and the R Markdown format. Having read about Blogdown, I’m making the transition.</p>
+<p>So far this is great. I can embed R code like this:</p>
 <pre class="r"><code>summary(cars)</code></pre>
 <pre><code>##      speed           dist       
 ##  Min.   : 4.0   Min.   :  2.00  
@@ -84,9 +89,7 @@
 ##  Mean   :15.4   Mean   : 42.98  
 ##  3rd Qu.:19.0   3rd Qu.: 56.00  
 ##  Max.   :25.0   Max.   :120.00</code></pre>
-</div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
+<p>Or include plots:</p>
 <pre class="r"><code>pie(
   c(280, 60, 20),
   c(&#39;Sky&#39;, &#39;Sunny side of pyramid&#39;, &#39;Shady side of pyramid&#39;),
@@ -94,6 +97,18 @@
   init.angle = -50, border = NA
 )</code></pre>
 <p><img src="/posts/2019-05-07-hello_world_files/figure-html/sky-1.png" width="672" /></p>
+<hr />
+<p>I don’t anticipate blogging a lot, but I hope to make this a platform to showcase some of my pet projects. Fair warning, a lot of my projects revolve on my dog, Harper, so I literally mean “pet”. Below are a few examples I hope to post about soon:</p>
+<ul>
+<li>Raspberry Pi timelapse video of Harper crate-training</li>
+<li>Harper/Not Harper image classification mobile app</li>
+<li>Harper autoencoder to generate new, “fake” Harper images</li>
+</ul>
+<hr />
+<div class="figure">
+<img src="/img/harper.jpg" alt="Thanks for reading!" style="width:100.0%" style="height:100.0%" />
+<p class="caption">Thanks for reading!</p>
+</div>
 </div>
 
               <hr>
@@ -127,7 +142,7 @@
       if (window.location.hostname == "localhost")
         return;
 
-      var disqus_shortname = '';
+      var disqus_shortname = 'mitchbeebe-com';
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
@@ -155,11 +170,12 @@
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="https://mitchbeebe.com/js/docs.min.js"></script>
-<script src="https://mitchbeebe.com/js/main.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><script src="/highlight.pack.js"></script>
 
-<script src="https://mitchbeebe.com/js/ie10-viewport-bug-workaround.js"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
 
 
 

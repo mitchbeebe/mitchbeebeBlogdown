@@ -7,7 +7,7 @@ tags: ["R","webscraping", "Selenium", "NHL"]
 
 I love hockey. I also love data science. What's better than merging the two and learn how to use RSelenium in the process? 
 
-A while ago, I wrote some web-scraping [code](https://github.com/mitchbeebe/nhlStandings) to find the NHL standings as of Novermber 1st (roughtly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website _dropyourgloves.com_ had convenient and uniform URLs to simply combine season and date strings to create a valid URL to scrape the corresponding HTML table. Unfortunately, the website no longer exists!
+A while ago, I wrote some web-scraping [code](https://github.com/mitchbeebe/nhlStandings) to find the NHL standings as of Novermber 1st (roughly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website _dropyourgloves.com_ had convenient and uniform URLs to simply combine season and date strings to create a valid URL to scrape the corresponding HTML table. Unfortunately, the website no longer exists!
 
 After some Google-Fu, I was unable to find a replacement website, however, I found [shrpsports.com](http://www.shrpsports.com), which has an easy-to-use dropdown UI, submit bottons, and resulting HTML table. This isn't as easy as find and replace in the code, so I needed to load RSelenium for automating the browser to populate dropdowns and click submit.
 

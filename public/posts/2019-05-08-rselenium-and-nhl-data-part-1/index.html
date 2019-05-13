@@ -6,16 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Mitch Beebe" />
     <meta name="description" content="My personal website and blog">
-    <link rel="shortcut icon" type="image/x-icon" href="https://mitchbeebe.com/img/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
     <title>Webscraping NHL Data with RSelenium, Part 1</title>
     <meta name="generator" content="Hugo 0.40.3" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-    <link rel="stylesheet" type="text/css" href="https://mitchbeebe.com/css/vitae-skeleton.css" />
-    <link rel="stylesheet" type="text/css" href="https://mitchbeebe.com/css/vitae-layout.css" />
-    <link rel="stylesheet" type="text/css" href="https://mitchbeebe.com/css/sustain-main.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vitae-skeleton.css" />
+    <link rel="stylesheet" type="text/css" href="/css/vitae-layout.css" />
+    <link rel="stylesheet" type="text/css" href="/css/sustain-main.css" />
+    <link rel="stylesheet" href="/css/tomorrow-night-eighties.css" rel="stylesheet" id="theme-stylesheet">
+    <script src="/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <link rel="stylesheet" href="/css/tomorrow-night-eighties">
     
     <!--[if lt IE 9]>
 			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -32,7 +37,7 @@
       <nav class="navbar navbar-default">
   <div class="container">
     <div class="navbar-header">
-      <a class="navbar-brand" href="https://mitchbeebe.com/"><i class="fa fa-home"></i></a>
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -57,7 +62,7 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="https://mitchbeebe.com/posts/2019-05-08-rselenium-and-nhl-data-part-1/">Webscraping NHL Data with RSelenium, Part 1</a></strong>
+            <strong><a href="/posts/2019-05-08-rselenium-and-nhl-data-part-1/">Webscraping NHL Data with RSelenium, Part 1</a></strong>
           </h3>
         </div>
         <div class="blog-title">
@@ -82,7 +87,7 @@
 
 
 <p>I love hockey. I also love data science. What’s better than merging the two and learn how to use RSelenium in the process?</p>
-<p>A while ago, I wrote some web-scraping <a href="https://github.com/mitchbeebe/nhlStandings">code</a> to find the NHL standings as of Novermber 1st (roughtly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website <em>dropyourgloves.com</em> had convenient and uniform URLs to simply combine season and date strings to create a valid URL to scrape the corresponding HTML table. Unfortunately, the website no longer exists!</p>
+<p>A while ago, I wrote some web-scraping <a href="https://github.com/mitchbeebe/nhlStandings">code</a> to find the NHL standings as of Novermber 1st (roughly one month into the season). I was doing this in order to determine if a strong start to the season was related to end-of-season success. Fortunately, the website <em>dropyourgloves.com</em> had convenient and uniform URLs to simply combine season and date strings to create a valid URL to scrape the corresponding HTML table. Unfortunately, the website no longer exists!</p>
 <p>After some Google-Fu, I was unable to find a replacement website, however, I found <a href="http://www.shrpsports.com">shrpsports.com</a>, which has an easy-to-use dropdown UI, submit bottons, and resulting HTML table. This isn’t as easy as find and replace in the code, so I needed to load RSelenium for automating the browser to populate dropdowns and click submit.</p>
 <p>I found that the preferred way to run RSelenium is via a headless browser running in Docker. This was the first case I found myself needing either technology. I still have work to do to write more robust code, but I got this working, so I wanted to post about it.</p>
 <p><strong>Set up Docker</strong></p>
@@ -1080,7 +1085,7 @@ TRUE
       if (window.location.hostname == "localhost")
         return;
 
-      var disqus_shortname = '';
+      var disqus_shortname = 'mitchbeebe-com';
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
       dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
@@ -1108,11 +1113,12 @@ TRUE
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="https://mitchbeebe.com/js/docs.min.js"></script>
-<script src="https://mitchbeebe.com/js/main.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><script src="/highlight.pack.js"></script>
 
-<script src="https://mitchbeebe.com/js/ie10-viewport-bug-workaround.js"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
 
 
 

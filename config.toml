@@ -2,7 +2,7 @@ baseurl = "https://www.mitchbeebe.com/"
 languageCode = "en-US"
 title = "Mitch Beebe"
 # Enable comments by entering your Disqus shortname
-disqusShortname = ""
+disqusShortname = "mitchbeebe-com"
 # Enable Google Analytics by entering your tracking code
 googleAnalytics = ""
 theme = "hugo-sustain-vitae"
@@ -15,11 +15,11 @@ ignoreFiles = ["\\*.Rmd$"]
   avatar = "profile.png"
   author = "Mitch Beebe"
   description = "My personal website and blog"
-  resume = "MBeebeResume-2019-04-06.pdf"
+  resume = "MBeebeResume-2019-05-12.pdf"
 
   # Custom assets can be linked with their paths relative to static/
-  custom_css = []
-  custom_js  = []
+  custom_css = ["css/tomorrow-night-eighties"]
+  custom_js  = ["highlight.pack.js"]
 
 [params.social]
   Github        = "mitchbeebe"

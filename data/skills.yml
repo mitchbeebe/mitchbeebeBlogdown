@@ -4,11 +4,8 @@ source:
   - name: [R]
     stars: 5
     
-  - name: [SQL (Postgres/Hive/Impala)]
+  - name: [SQL (Postgres), Hive, Impala]
     stars: 4
 
-  - name: [Python, Bash, Git]
+  - name: [Python, Spark, Bash, Git]
     stars: 3
-  
-  - name: [Spark, Scala]
-    stars: 2

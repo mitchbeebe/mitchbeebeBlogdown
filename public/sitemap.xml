@@ -3,6 +3,21 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/posts/raspberry-pi-dog-monitor/</loc>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/raspberry-pi-dog-monitor/</loc>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/posts/raspberry-pi-dog-monitor/</loc>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/posts/2019-05-08-rselenium-and-nhl-data-part-1/</loc>
     <lastmod>2019-05-08T00:00:00+00:00</lastmod>
   </url>
@@ -24,7 +39,7 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -36,7 +51,19 @@
   
   <url>
     <loc>/posts/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/python/</loc>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/python/</loc>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -49,6 +76,12 @@
   <url>
     <loc>/categories/r/</loc>
     <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/raspberry-pi/</loc>
+    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

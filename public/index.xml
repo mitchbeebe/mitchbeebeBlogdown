@@ -6,7 +6,7 @@
     <description>Recent content on Mitch Beebe</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Tue, 21 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 23 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,10 +14,10 @@
     <item>
       <title>Webcam Image Classification</title>
       <link>/posts/webcam-image-classification/</link>
-      <pubDate>Tue, 21 May 2019 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 23 May 2019 00:00:00 +0000</pubDate>
       
       <guid>/posts/webcam-image-classification/</guid>
-      <description>As I mentioned in my “Hello World” post, I’m fascinated with computer vision. I’m still in the process of writing up a post about the image classification mobile app that I made to detect whether my iPhone camera is pointing at my dog or not. While doing so, I figured out how to incorporate Tensorflow/Keras ML models into an RMarkdown blog post and decided to share this in the meantime. I was thinking I’d need to embed a Shiny application with an upload photo UI, pre-loaded model, and image display, but to my surprise, it can all be done with a few JavaScript code chunks in a .</description>
+      <description>As I mentioned in my “Hello World” post, I’m fascinated with computer vision. I’m in the process of writing up a post about the image classification mobile app that I made to detect whether my iPhone camera is pointing at my dog or not. While trying to figure out how to host a live ML model within a browser, I learned how to call pre-trained Tensorflow models from the HTML &amp;lt;script&amp;gt; tag.</description>
     </item>
     
     <item>

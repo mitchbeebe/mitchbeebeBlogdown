@@ -1,6 +1,6 @@
 ---
 title: Webcam Image Classification
-date: 2019-05-21
+date: 2019-05-23
 slug: webcam-image-classification
 categories: []
 tags:
@@ -11,46 +11,12 @@ tags:
 
 
 
-<p>As I mentioned in my <a href="/posts/2019-05-07-hello_world/">“Hello World”</a> post, I’m fascinated with computer vision. I’m still in the process of writing up a post about the image classification mobile app that I made to detect whether my iPhone camera is pointing at my dog or not. While doing so, I figured out how to incorporate Tensorflow/Keras ML models into an RMarkdown blog post and decided to share this in the meantime. I was thinking I’d need to embed a Shiny application with an upload photo UI, pre-loaded model, and image display, but to my surprise, it can all be done with a few JavaScript code chunks in a .Rmd file.</p>
+<p>As I mentioned in my <a href="/posts/2019-05-07-hello_world/">“Hello World”</a> post, I’m fascinated with computer vision. I’m in the process of writing up a post about the image classification mobile app that I made to detect whether my iPhone camera is pointing at my dog or not. While trying to figure out how to host a live ML model within a browser, I learned how to call pre-trained Tensorflow models from the HTML <code>&lt;script&gt;</code> tag. This option is pretty straightforward, but required learning a bit of JavaScript. If I tried to do this strictly in R, I anticipated embedding a Shiny application with an upload photo UI, pre-loaded model, image display, etc.</p>
 <p><br></p>
-<p>In this post, I create a webcam image classifier using the pre-trained MobileNet model from TensorflowJS. It takes a few seconds to process the raw webcam input, classify, and display results, so be patient.</p>
-<!-- Load TensorFlow.js. This is required to use MobileNet. -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"></script>
-<!-- Load the MobileNet model. -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.1"></script>
-<!-- Load D3 for the visualization of predicted image classifications -->
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<style>
-.bar {
-    fill: #27A822;
-}
+<p>In this post, I create a webcam image classifier using a pre-trained TensorFlow.js MobileNet model hosted on <a href="https://www.jsdelivr.com/">jsDelivr</a>. MobileNets are relatively small neural networks that are optimized to work well on less powerful computers (e.g. cell phones, tablets). This increased efficiency comes with a tradeoff in accuracy. Depending on the exact architecture chosen, MobileNets tend to top out around 60-70% accuracy. This particular model can predict <a href="https://github.com/tensorflow/tfjs-models/blob/master/mobilenet/src/imagenet_classes.ts">1,000 different classes</a>, mostly commonplace objects and animals. I’ve found that it gets confused when the background is non-monochromatic, so for best results try to position the object in front of something simple. Before diving into the code, I am by no means a front end developer, so forgive the weak UI and delay in classification and display of the results. Below is the final product, followed by the instructions to recreate it. Have fun!</p>
+<p><br></p>
 
-.axis {
-    font-size: 10px;
-}
-
-.axis path,
-.axis line {
-    fill: none;
-    display: none;
-}
-
-.label {
-    font-size: 13px;
-}
-
-.column {
-  float: left;
-  width: 33.33%;
-}
-
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-</style>
-
+<center><h3>The final product!</h3></center>
 <p align="center">
   <button id="capture-button" class="capture-button">Capture video</button>
   <button id="screenshot-button" disabled>Take screenshot</button>
@@ -58,168 +24,91 @@ tags:
 <br>
 <div class="row">
   <div class="column">
-    <video class="videostream" width="240" height="180" autoplay></video>
+    <video class="videostream" width="100%" height="180" autoplay></video>
   </div>
   <div class="column">
-    <img id="screenshot-img" width="240" height="180">
+    <img id="screenshot-img" width="100%" height="180">
   </div>
   <div class="column">
-    <div id="graphic" align="center" width="240" height="180"></div>
+    <div id="graphic" align="center" width="100%" height="180"></div>
   </div>
 </div>
 
-<!-- <div id="screenshot" style="text-align:center;"> -->
-<!--   <p><button class="capture-button">Capture video</button> -->
-<!--   <button id="screenshot-button" disabled>Take screenshot</button></p> -->
-<!--   <br> -->
-<!--   <video class="videostream" autoplay></video> -->
-<!--   <img id="screenshot-img"> -->
-<!--   <p id="demo"></p> -->
-<!--   <div id="graphic" align="center"></div> -->
-<!-- </div> -->
-<pre class="js"><code>const constraints = {
-  video: true
-};
-const captureVideoButton = document.getElementById(&#39;capture-button&#39;);
-const screenshotButton = document.getElementById(&#39;screenshot-button&#39;);
-const img = document.getElementById(&#39;screenshot-img&#39;);
-const video = document.querySelector(&#39;video&#39;);
-const canvas = document.createElement(&#39;canvas&#39;);
-
-// set the dimensions and margins of the graph
-var margin = {top: 0, right: 0, bottom: 25, left: 110},
-    width = 240 - margin.left - margin.right,
-    height = 180 - margin.top - margin.bottom;
-
-var svg = d3.select(&quot;#graphic&quot;).append(&quot;svg&quot;)
-        .attr(&quot;width&quot;, width + margin.left + margin.right)
-        .attr(&quot;height&quot;, height + margin.top + margin.bottom)
-      .append(&quot;g&quot;)
-        .attr(&quot;transform&quot;, 
-              &quot;translate(&quot; + margin.left + &quot;,&quot; + margin.top + &quot;)&quot;);
-
-// set the ranges
-var y = d3.scaleBand()
-          .range([height, 0])
-          .padding(0.1);
-
-var x = d3.scaleLinear()
-          .range([0, width]);
-          
-var xAxis = d3.axisBottom(x)
-              .ticks(4)
-              .tickFormat(d =&gt; Math.round(d*100) + &quot;%&quot;);
-var yAxis = d3.axisLeft(y);
-          
-svg.append(&quot;g&quot;)
-    .attr(&quot;class&quot;, &quot;y axis&quot;)
-    .call(yAxis);
-svg.append(&quot;g&quot;)
-    .attr(&quot;class&quot;, &quot;x axis&quot;);
-
-captureVideoButton.onclick = function() {
-  navigator.mediaDevices.getUserMedia(constraints).
-    then(handleSuccess).catch(handleError);
-};
-
-function wrap(text, width) {
-  text.each(function() {
-    var text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word,
-        line = [],
-        lineNumber = 0,
-        lineHeight = 0.5, // ems
-        y = text.attr(&quot;y&quot;),
-        dy = parseFloat(text.attr(&quot;dy&quot;)),
-        tspan = text.text(null).append(&quot;tspan&quot;).attr(&quot;x&quot;, -10).attr(&quot;y&quot;, y).attr(&quot;dy&quot;, dy + &quot;em&quot;)
-    while (word = words.pop()) {
-      line.push(word)
-      tspan.text(line.join(&quot; &quot;))
-      if (tspan.node().getComputedTextLength() &gt; width) {
-        line.pop()
-        tspan.text(line.join(&quot; &quot;))
-        line = [word]
-        tspan = text.append(&quot;tspan&quot;)
-                        .attr(&quot;x&quot;, -10)
-                        .attr(&quot;y&quot;, y)
-                        .attr(&quot;dy&quot;, `${++lineNumber * lineHeight + dy}em`)
-                        .text(word)
-      }
-    }
-  })
+<p><br></p>
+<div id="how-its-made" class="section level3">
+<h3>How it’s made:</h3>
+<p>The first step is to load the necessary libraries:</p>
+<ul>
+<li>TensorFlow.js to run the model</li>
+<li>The MobileNet model to classify the images</li>
+<li>D3.js for visualization</li>
+</ul>
+<pre class="js"><code>&lt;!-- Load TensorFlow.js. This is required to use MobileNet. --&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1&quot;&gt;&lt;/script&gt;
+&lt;!-- Load the MobileNet model. --&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.1&quot;&gt;&lt;/script&gt;
+&lt;!-- Load D3 for the visualization of predicted image classifications --&gt;
+&lt;script src=&quot;https://d3js.org/d3.v4.min.js&quot;&gt;&lt;/script&gt;</code></pre>
+<!-- Load TensorFlow.js. This is required to use MobileNet. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"></script>
+<!-- Load the MobileNet model. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.1"></script>
+<!-- Load D3 for the visualization of predicted image classifications -->
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<p><br></p>
+<p>I add some (bare minimum) CSS so that the UI is somewhat presentable.</p>
+<pre class="css"><code>&lt;style&gt;
+.bar {
+    fill: #27A822;
 }
-
-function update(data) {
-    
-    //sort bars based on value
-    data = data.sort(function (a, b) { 
-        return d3.ascending(a.probability, b.probability);
-    });
-    
-    // format the data
-    data.forEach(function(d) {
-      d.probability = +d.probability;
-    });
-  
-    // Scale the range of the data in the domains
-    x.domain([0, d3.max(data, function(d){ return d.probability; })])
-    y.domain(data.map(function(d) { return d.className; }));
-  
-    // append the rectangles for the bar chart
-    var bars = svg.selectAll(&quot;.bar&quot;)
-        .remove()
-        .exit()
-        .data(data)
-    
-    bars.enter()
-        .append(&quot;rect&quot;)
-        .attr(&quot;class&quot;, &quot;bar&quot;)
-        .attr(&quot;width&quot;, function(d) {return x(d.probability); } )
-        .attr(&quot;y&quot;, function(d) { return y(d.className); })
-        .attr(&quot;height&quot;, y.bandwidth());
-  
-    // add the x Axis
-    svg.select(&quot;.x&quot;)
-        .attr(&quot;transform&quot;, &quot;translate(0,&quot; + height + &quot;)&quot;)
-        .call(d3.axisBottom(x)
-                .ticks(4)
-                .tickFormat(d =&gt; Math.round(d*100) + &quot;%&quot;));
-  
-    // Add the y Axis
-    svg.select(&quot;.y&quot;)
-        .call(d3.axisLeft(y))
-      .selectAll(&quot;.tick text&quot;)
-        .call(wrap, 100);
+.axis {
+    font-size: 10px;
 }
-
-screenshotButton.onclick = video.onclick = function() {
-  
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext(&#39;2d&#39;).drawImage(video, 0, 0);
-  // Other browsers will fall back to image/png
-  img.src = canvas.toDataURL(&#39;image/webp&#39;);
-  
-  const img_tmp = document.getElementById(&#39;screenshot-img&#39;);
-  
-  // Load the model.
-  mobilenet.load().then(model =&gt; {
-    
-    // Classify the image.
-    model.classify(img_tmp).then(predictions =&gt; {
-      
-      update(predictions);
-            
-    });
-  });
-};
-
-function handleSuccess(stream) {
-  screenshotButton.disabled = false;
-  video.srcObject = stream;
-};</code></pre>
+.axis path,
+.axis line {
+    fill: none;
+    display: none;
+}
+.label {
+    font-size: 13px;
+}
+.column {
+  float: left;
+  width: 33.33%;
+}
+.row:after {
+  content: &quot;&quot;;
+  display: table;
+  clear: both;
+}
+&lt;/style&gt;</code></pre>
+<style>
+.bar {
+    fill: #27A822;
+}
+.axis {
+    font-size: 10px;
+}
+.axis path,
+.axis line {
+    fill: none;
+    display: none;
+}
+.label {
+    font-size: 13px;
+}
+.column {
+  float: left;
+  width: 33.33%;
+}
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
 <script type="text/javascript">
+// Initialize webcam and image settings
 const constraints = {
   video: true
 };
@@ -229,11 +118,12 @@ const img = document.getElementById('screenshot-img');
 const video = document.querySelector('video');
 const canvas = document.createElement('canvas');
 
-// set the dimensions and margins of the graph
+// Set the dimensions and margins of the graph
 var margin = {top: 0, right: 0, bottom: 25, left: 110},
     width = 240 - margin.left - margin.right,
     height = 180 - margin.top - margin.bottom;
 
+// Create the graph with the dimensions set above
 var svg = d3.select("#graphic").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -241,30 +131,33 @@ var svg = d3.select("#graphic").append("svg")
         .attr("transform", 
               "translate(" + margin.left + "," + margin.top + ")");
 
-// set the ranges
+// Set the range of y and x
 var y = d3.scaleBand()
           .range([height, 0])
           .padding(0.1);
 
 var x = d3.scaleLinear()
           .range([0, width]);
-          
+
+// Initialize the axes with the x-axis formatted as a percentage     
 var xAxis = d3.axisBottom(x)
               .ticks(4)
               .tickFormat(d => Math.round(d*100) + "%");
 var yAxis = d3.axisLeft(y);
-          
+
+// Attach the settings for the axes
 svg.append("g")
     .attr("class", "y axis")
     .call(yAxis);
 svg.append("g")
     .attr("class", "x axis");
-
+    
+// When the video button is clicked, open the video webcam and begin streaming
 captureVideoButton.onclick = function() {
   navigator.mediaDevices.getUserMedia(constraints).
     then(handleSuccess).catch(handleError);
 };
-
+    
 function wrap(text, width) {
   text.each(function() {
     var text = d3.select(this),
@@ -291,51 +184,54 @@ function wrap(text, width) {
       }
     }
   })
-}
-
+};
+    
 function update(data) {
     
-    //sort bars based on value
-    data = data.sort(function (a, b) { 
-        return d3.ascending(a.probability, b.probability);
-    });
-    
-    // format the data
-    data.forEach(function(d) {
-      d.probability = +d.probability;
-    });
+  // Sort bars based on value
+  data = data.sort(function (a, b) { 
+      return d3.ascending(a.probability, b.probability);
+  });
   
-    // Scale the range of the data in the domains
-    x.domain([0, d3.max(data, function(d){ return d.probability; })])
-    y.domain(data.map(function(d) { return d.className; }));
-  
-    // append the rectangles for the bar chart
-    var bars = svg.selectAll(".bar")
-        .remove()
-        .exit()
-        .data(data)
-    
-    bars.enter()
-        .append("rect")
-        .attr("class", "bar")
-        .attr("width", function(d) {return x(d.probability); } )
-        .attr("y", function(d) { return y(d.className); })
-        .attr("height", y.bandwidth());
-  
-    // add the x Axis
-    svg.select(".x")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x)
-                .ticks(4)
-                .tickFormat(d => Math.round(d*100) + "%"));
-  
-    // Add the y Axis
-    svg.select(".y")
-        .call(d3.axisLeft(y))
-      .selectAll(".tick text")
-        .call(wrap, 100);
-}
+  // Format the data
+  data.forEach(function(d) {
+    d.probability = +d.probability;
+  });
 
+  // Scale the range of the data in the domains
+  x.domain([0, d3.max(data, function(d){ return d.probability; })])
+  y.domain(data.map(function(d) { return d.className; }));
+
+  // Remove any existing bars on the graph
+  var bars = svg.selectAll(".bar")
+      .remove()
+      .exit()
+      .data(data)
+  
+  // Add new bars using the new data
+  bars.enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("width", function(d) {return x(d.probability); } )
+      .attr("y", function(d) { return y(d.className); })
+      .attr("height", y.bandwidth());
+
+  // Add the x Axis
+  svg.select(".x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x)
+              .ticks(4)
+              .tickFormat(d => Math.round(d*100) + "%"));
+
+  // Add the y Axis
+  svg.select(".y")
+      .call(d3.axisLeft(y))
+    .selectAll(".tick text")
+      .call(wrap, 100);
+};
+
+// When the screenshot button or the video itself is clicked,
+// grab a still image of the stream and replace the blank canvas
 screenshotButton.onclick = video.onclick = function() {
   
   canvas.width = video.videoWidth;
@@ -346,14 +242,12 @@ screenshotButton.onclick = video.onclick = function() {
   
   const img_tmp = document.getElementById('screenshot-img');
   
-  // Load the model.
+  // Load the model
   mobilenet.load().then(model => {
-    
-    // Classify the image.
+    // Classify the image
     model.classify(img_tmp).then(predictions => {
-      
+      // Update the bar chart
       update(predictions);
-            
     });
   });
 };
@@ -363,3 +257,178 @@ function handleSuccess(stream) {
   video.srcObject = stream;
 };
 </script>
+<p><br></p>
+<p>Next, I add a basic UI with a “Capture video” and “Take screenshot” button that will start the webcam and screenshot a single frame to initiate object classification, respectively.</p>
+<pre><code>&lt;p align=&quot;center&quot;&gt;
+  &lt;button id=&quot;capture-button&quot; class=&quot;capture-button&quot;&gt;Capture video&lt;/button&gt;
+  &lt;button id=&quot;screenshot-button&quot; disabled&gt;Take screenshot&lt;/button&gt;
+&lt;/p&gt;
+&lt;br&gt;
+&lt;div class=&quot;row&quot;&gt;
+  &lt;div class=&quot;column&quot;&gt;
+    &lt;video class=&quot;videostream&quot; width=&quot;240&quot; height=&quot;180&quot; autoplay&gt;&lt;/video&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;column&quot;&gt;
+    &lt;img id=&quot;screenshot-img&quot; width=&quot;240&quot; height=&quot;180&quot;&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;column&quot;&gt;
+    &lt;div id=&quot;graphic&quot; align=&quot;center&quot; width=&quot;240&quot; height=&quot;180&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<p><br></p>
+<p>Now that the UI is all set up, you need to make it react to input. To start, I initialize several variables that will be used later by the webcam. I also set up the size and axes of the graph that will ultimately display the top 3 classes and corresponding probabilities that the MobileNet predicts for the object in the still screenshot.</p>
+<pre class="js"><code>// Initialize webcam and image settings
+const constraints = {
+  video: true
+};
+const captureVideoButton = document.getElementById(&#39;capture-button&#39;);
+const screenshotButton = document.getElementById(&#39;screenshot-button&#39;);
+const img = document.getElementById(&#39;screenshot-img&#39;);
+const video = document.querySelector(&#39;video&#39;);
+const canvas = document.createElement(&#39;canvas&#39;);
+
+// Set the dimensions and margins of the graph
+var margin = {top: 0, right: 0, bottom: 25, left: 110},
+    width = 240 - margin.left - margin.right,
+    height = 180 - margin.top - margin.bottom;
+
+// Create the graph with the dimensions set above
+var svg = d3.select(&quot;#graphic&quot;).append(&quot;svg&quot;)
+        .attr(&quot;width&quot;, width + margin.left + margin.right)
+        .attr(&quot;height&quot;, height + margin.top + margin.bottom)
+      .append(&quot;g&quot;)
+        .attr(&quot;transform&quot;, 
+              &quot;translate(&quot; + margin.left + &quot;,&quot; + margin.top + &quot;)&quot;);
+
+// Set the range of y and x
+var y = d3.scaleBand()
+          .range([height, 0])
+          .padding(0.1);
+
+var x = d3.scaleLinear()
+          .range([0, width]);
+
+// Initialize the axes with the x-axis formatted as a percentage     
+var xAxis = d3.axisBottom(x)
+              .ticks(4)
+              .tickFormat(d =&gt; Math.round(d*100) + &quot;%&quot;);
+var yAxis = d3.axisLeft(y);
+
+// Attach the settings for the axes
+svg.append(&quot;g&quot;)
+    .attr(&quot;class&quot;, &quot;y axis&quot;)
+    .call(yAxis);
+svg.append(&quot;g&quot;)
+    .attr(&quot;class&quot;, &quot;x axis&quot;);</code></pre>
+<p><br></p>
+<p>Because I decided to put the videostream, screenshot, and graph all on the same row of the site, the y-axis labels tended to get cut off, especially when the predicted class is something like “cellular telephone, cellular phone, cellphone, cell, mobile phone”. This next function was taken almost directly from <a href="https://bl.ocks.org/mbostock/7555321">here</a> with minor tweaks to work on a horizontal bar chart rather than a vertical one. It takes text and a fixed width and splits it over several lines.</p>
+<pre class="js"><code>function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 0.5, // ems
+        y = text.attr(&quot;y&quot;),
+        dy = parseFloat(text.attr(&quot;dy&quot;)),
+        tspan = text.text(null).append(&quot;tspan&quot;).attr(&quot;x&quot;, -10).attr(&quot;y&quot;, y).attr(&quot;dy&quot;, dy + &quot;em&quot;)
+    while (word = words.pop()) {
+      line.push(word)
+      tspan.text(line.join(&quot; &quot;))
+      if (tspan.node().getComputedTextLength() &gt; width) {
+        line.pop()
+        tspan.text(line.join(&quot; &quot;))
+        line = [word]
+        tspan = text.append(&quot;tspan&quot;)
+                        .attr(&quot;x&quot;, -10)
+                        .attr(&quot;y&quot;, y)
+                        .attr(&quot;dy&quot;, `${++lineNumber * lineHeight + dy}em`)
+                        .text(word)
+      }
+    }
+  })
+}</code></pre>
+<p><br></p>
+<p>The last function related to the D3.js graph is below. It updates the existing graph with the data it receives anytime it is called. It’s all pretty self-explanatory, so see the comments within the function.</p>
+<pre class="js"><code>function update(data) {
+    
+    // Sort bars based on value
+    data = data.sort(function (a, b) { 
+        return d3.ascending(a.probability, b.probability);
+    });
+    
+    // Format the data
+    data.forEach(function(d) {
+      d.probability = +d.probability;
+    });
+  
+    // Scale the range of the data in the domains
+    x.domain([0, d3.max(data, function(d){ return d.probability; })])
+    y.domain(data.map(function(d) { return d.className; }));
+  
+    // Remove any existing bars on the graph
+    var bars = svg.selectAll(&quot;.bar&quot;)
+        .remove()
+        .exit()
+        .data(data)
+    
+    // Add new bars using the new data
+    bars.enter()
+        .append(&quot;rect&quot;)
+        .attr(&quot;class&quot;, &quot;bar&quot;)
+        .attr(&quot;width&quot;, function(d) {return x(d.probability); } )
+        .attr(&quot;y&quot;, function(d) { return y(d.className); })
+        .attr(&quot;height&quot;, y.bandwidth());
+  
+    // Add the x Axis
+    svg.select(&quot;.x&quot;)
+        .attr(&quot;transform&quot;, &quot;translate(0,&quot; + height + &quot;)&quot;)
+        .call(d3.axisBottom(x)
+                .ticks(4)
+                .tickFormat(d =&gt; Math.round(d*100) + &quot;%&quot;));
+  
+    // Add the y Axis
+    svg.select(&quot;.y&quot;)
+        .call(d3.axisLeft(y))
+      .selectAll(&quot;.tick text&quot;)
+        .call(wrap, 100);
+}</code></pre>
+<p><br></p>
+<p>So far, I’ve set up the UI and the code to create the graph, but have not set up either the webcam or screenshot mechanism. In the next code chunk, I capture the video stream on button click using the <code>getUserMedia()</code> API. <a href="https://www.html5rocks.com/en/tutorials/getusermedia/intro/">HTML5rocks.com</a> has a very helpful article on video and audio capturing, if you’re interested in learning more. Next, I update the canvas element acting as the placeholder for the screenshot. That screenshot image then gets fed into the MobileNet model and the resulting predictions are passed in as the data to the <code>update()</code> function I wrote above.</p>
+<pre class="js"><code>// When the video button is clicked, open the video webcam and begin streaming
+captureVideoButton.onclick = function() {
+  navigator.mediaDevices.getUserMedia(constraints).
+    then(handleSuccess).catch(handleError);
+};
+
+function handleSuccess(stream) {
+  screenshotButton.disabled = false;
+  video.srcObject = stream;
+};
+
+// When the screenshot button or the video itself is clicked,
+// grab a still image of the stream and replace the blank canvas
+screenshotButton.onclick = video.onclick = function() {
+  
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext(&#39;2d&#39;).drawImage(video, 0, 0);
+  // Other browsers will fall back to image/png
+  img.src = canvas.toDataURL(&#39;image/webp&#39;);
+  
+  const img_tmp = document.getElementById(&#39;screenshot-img&#39;);
+  
+  // Load the model
+  mobilenet.load().then(model =&gt; {
+    
+    // Classify the image
+    model.classify(img_tmp).then(predictions =&gt; {
+      
+      // Update the bar chart
+      update(predictions);
+            
+    });
+  });
+};</code></pre>
+</div>

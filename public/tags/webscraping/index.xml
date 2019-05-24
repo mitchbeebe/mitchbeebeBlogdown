@@ -6,10 +6,19 @@
     <description>Recent content in Webscraping on Mitch Beebe</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Wed, 08 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 15 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/webscraping/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Webscraping NHL Data with RSelenium, Part 2</title>
+      <link>/posts/2019-05-15-webscraping-nhl-data-with-rselenium-part-2/</link>
+      <pubDate>Wed, 15 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/2019-05-15-webscraping-nhl-data-with-rselenium-part-2/</guid>
+      <description>NHL-WHA merger With the absorption of four teams from the World Hockey Association in the 1979–1980 season, a new playoff system was introduced where 16 of the league’s 21 teams would qualify for postseason play. The four division winners would qualify for the playoffs while twelve wildcard positions rounded out the sixteen teams. At the beginning of each round the teams were seeded based on their regular season point totals, with the preliminary round being a best-of-five series while all other playoff series were best-of-seven.</description>
+    </item>
     
     <item>
       <title>Webscraping NHL Data with RSelenium, Part 1</title>

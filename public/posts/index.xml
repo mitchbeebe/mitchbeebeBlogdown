@@ -6,10 +6,28 @@
     <description>Recent content in Posts on Mitch Beebe</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Mon, 13 May 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 21 May 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Webcam Image Classification</title>
+      <link>/posts/webcam-image-classification/</link>
+      <pubDate>Tue, 21 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/webcam-image-classification/</guid>
+      <description>As I mentioned in my “Hello World” post, I’m fascinated with computer vision. I’m still in the process of writing up a post about the image classification mobile app that I made to detect whether my iPhone camera is pointing at my dog or not. While doing so, I figured out how to incorporate Tensorflow/Keras ML models into an RMarkdown blog post and decided to share this in the meantime. I was thinking I’d need to embed a Shiny application with an upload photo UI, pre-loaded model, and image display, but to my surprise, it can all be done with a few JavaScript code chunks in a .</description>
+    </item>
+    
+    <item>
+      <title>Webscraping NHL Data with RSelenium, Part 2</title>
+      <link>/posts/2019-05-15-webscraping-nhl-data-with-rselenium-part-2/</link>
+      <pubDate>Wed, 15 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/posts/2019-05-15-webscraping-nhl-data-with-rselenium-part-2/</guid>
+      <description>NHL-WHA merger With the absorption of four teams from the World Hockey Association in the 1979–1980 season, a new playoff system was introduced where 16 of the league’s 21 teams would qualify for postseason play. The four division winners would qualify for the playoffs while twelve wildcard positions rounded out the sixteen teams. At the beginning of each round the teams were seeded based on their regular season point totals, with the preliminary round being a best-of-five series while all other playoff series were best-of-seven.</description>
+    </item>
     
     <item>
       <title>Raspberry Pi Dog Monitor</title>
@@ -18,24 +36,6 @@
       
       <guid>/posts/raspberry-pi-dog-monitor/</guid>
       <description>Crate-training a puppy can be tough and a total surprise when you come home to find that they’ve torn up their bed, had an accident, or worse, broken free and vandalized your apartment. My dog, Harper, has done all three, but has since learned to love her cozy den. As I teased in my “Hello World” post, I built a dog monitor using a Raspberry Pi to see what she was up to while I was gone.</description>
-    </item>
-    
-    <item>
-      <title>Raspberry Pi Dog Monitor</title>
-      <link>/posts/raspberry-pi-dog-monitor/</link>
-      <pubDate>Mon, 13 May 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/raspberry-pi-dog-monitor/</guid>
-      <description>Crate-training a puppy can be tough and a total surprise when you come home to find that they&amp;rsquo;ve torn up their bed, had an accident, or worse, broken free and vandalized your apartment. My dog, Harper, has done all three, but has since learned to love her cozy den. As I teased in my &amp;ldquo;Hello World&amp;rdquo; post, I built a dog monitor using a Raspberry Pi to see what she was up to while I was gone.</description>
-    </item>
-    
-    <item>
-      <title>Raspberry Pi Dog Monitor</title>
-      <link>/posts/raspberry-pi-dog-monitor/</link>
-      <pubDate>Mon, 13 May 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/posts/raspberry-pi-dog-monitor/</guid>
-      <description>Crate-training a puppy can be tough and a total surprise when you come home to find that they&amp;rsquo;ve torn up their bed, had an accident, or worse, broken free and vandalized your apartment. My dog, Harper, has done all three, but has since learned to love her cozy den. As I teased in my &amp;ldquo;Hello World&amp;rdquo; post, I built a dog monitor using a Raspberry Pi to see what she was up to while I was gone.</description>
     </item>
     
     <item>

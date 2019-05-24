@@ -1,0 +1,233 @@
+---
+title: Webcam Image Classification
+date: 2019-05-21
+slug: webcam-image-classification
+categories: []
+tags:
+  - Image Classification
+  - Tensorflow
+  - JavaScript
+---
+
+
+As I mentioned in my ["Hello World"](/posts/2019-05-07-hello_world/) post, I'm fascinated with computer vision. I'm still in the process of writing up a post about the image classification mobile app that I made to detect whether my iPhone camera is pointing at my dog or not. While doing so, I figured out how to incorporate Tensorflow/Keras ML models into an RMarkdown blog post and decided to share this in the meantime. I was thinking I'd need to embed a Shiny application with an upload photo UI, pre-loaded model, and image display, but to my surprise, it can all be done with a few JavaScript code chunks in a .Rmd file.
+
+<br>
+
+In this post, I create a webcam image classifier using the pre-trained MobileNet model from TensorflowJS. It takes a few seconds to process the raw webcam input, classify, and display results, so be patient.
+
+
+<!-- Load TensorFlow.js. This is required to use MobileNet. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"></script>
+<!-- Load the MobileNet model. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.1"></script>
+<!-- Load D3 for the visualization of predicted image classifications -->
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<style>
+.bar {
+    fill: #27A822;
+}
+
+.axis {
+    font-size: 10px;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    display: none;
+}
+
+.label {
+    font-size: 13px;
+}
+
+.column {
+  float: left;
+  width: 33.33%;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
+
+<!--html_preserve-->
+<p align="center">
+  <button id="capture-button" class="capture-button">Capture video</button>
+  <button id="screenshot-button" disabled>Take screenshot</button>
+</p>
+<br>
+<div class="row">
+  <div class="column">
+    <video class="videostream" width="240" height="180" autoplay></video>
+  </div>
+  <div class="column">
+    <img id="screenshot-img" width="240" height="180">
+  </div>
+  <div class="column">
+    <div id="graphic" align="center" width="240" height="180"></div>
+  </div>
+</div>
+<!--/html_preserve-->
+
+<!-- <div id="screenshot" style="text-align:center;"> -->
+<!--   <p><button class="capture-button">Capture video</button> -->
+<!--   <button id="screenshot-button" disabled>Take screenshot</button></p> -->
+<!--   <br> -->
+<!--   <video class="videostream" autoplay></video> -->
+<!--   <img id="screenshot-img"> -->
+<!--   <p id="demo"></p> -->
+<!--   <div id="graphic" align="center"></div> -->
+<!-- </div> -->
+
+
+```{js}
+const constraints = {
+  video: true
+};
+const captureVideoButton = document.getElementById('capture-button');
+const screenshotButton = document.getElementById('screenshot-button');
+const img = document.getElementById('screenshot-img');
+const video = document.querySelector('video');
+const canvas = document.createElement('canvas');
+
+// set the dimensions and margins of the graph
+var margin = {top: 0, right: 0, bottom: 25, left: 110},
+    width = 240 - margin.left - margin.right,
+    height = 180 - margin.top - margin.bottom;
+
+var svg = d3.select("#graphic").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// set the ranges
+var y = d3.scaleBand()
+          .range([height, 0])
+          .padding(0.1);
+
+var x = d3.scaleLinear()
+          .range([0, width]);
+          
+var xAxis = d3.axisBottom(x)
+              .ticks(4)
+              .tickFormat(d => Math.round(d*100) + "%");
+var yAxis = d3.axisLeft(y);
+          
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis);
+svg.append("g")
+    .attr("class", "x axis");
+
+captureVideoButton.onclick = function() {
+  navigator.mediaDevices.getUserMedia(constraints).
+    then(handleSuccess).catch(handleError);
+};
+
+function wrap(text, width) {
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 0.5, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", -10).attr("y", y).attr("dy", dy + "em")
+    while (word = words.pop()) {
+      line.push(word)
+      tspan.text(line.join(" "))
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop()
+        tspan.text(line.join(" "))
+        line = [word]
+        tspan = text.append("tspan")
+                        .attr("x", -10)
+                        .attr("y", y)
+                        .attr("dy", `${++lineNumber * lineHeight + dy}em`)
+                        .text(word)
+      }
+    }
+  })
+}
+
+function update(data) {
+    
+    //sort bars based on value
+    data = data.sort(function (a, b) { 
+        return d3.ascending(a.probability, b.probability);
+    });
+    
+    // format the data
+    data.forEach(function(d) {
+      d.probability = +d.probability;
+    });
+  
+    // Scale the range of the data in the domains
+    x.domain([0, d3.max(data, function(d){ return d.probability; })])
+    y.domain(data.map(function(d) { return d.className; }));
+  
+    // append the rectangles for the bar chart
+    var bars = svg.selectAll(".bar")
+        .remove()
+        .exit()
+        .data(data)
+    
+    bars.enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("width", function(d) {return x(d.probability); } )
+        .attr("y", function(d) { return y(d.className); })
+        .attr("height", y.bandwidth());
+  
+    // add the x Axis
+    svg.select(".x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x)
+                .ticks(4)
+                .tickFormat(d => Math.round(d*100) + "%"));
+  
+    // Add the y Axis
+    svg.select(".y")
+        .call(d3.axisLeft(y))
+      .selectAll(".tick text")
+        .call(wrap, 100);
+}
+
+screenshotButton.onclick = video.onclick = function() {
+  
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  // Other browsers will fall back to image/png
+  img.src = canvas.toDataURL('image/webp');
+  
+  const img_tmp = document.getElementById('screenshot-img');
+  
+  // Load the model.
+  mobilenet.load().then(model => {
+    
+    // Classify the image.
+    model.classify(img_tmp).then(predictions => {
+      
+      update(predictions);
+            
+    });
+  });
+};
+
+function handleSuccess(stream) {
+  screenshotButton.disabled = false;
+  video.srcObject = stream;
+};
+```
+
+

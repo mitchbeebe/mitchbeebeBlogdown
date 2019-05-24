@@ -1,8 +1,12 @@
 ---
-title:  "Webscraping NHL Data with RSelenium, Part 1"
-date: 2019-05-08
-categories: ["R"]
-tags: ["R","webscraping", "Selenium", "NHL"]
+title: "Webscraping NHL Data with RSelenium, Part 1"
+date: '2019-05-08'
+tags:
+- R
+- webscraping
+- Selenium
+- NHL
+categories: R
 ---
 
 I love hockey. I also love data science. What's better than merging the two and learn how to use RSelenium in the process? 
@@ -30,6 +34,10 @@ library(tidyverse)
 library(glue)
 library(knitr)
 library(kableExtra)
+
+# Start a docker container with Google Chrome on port 4444 on
+#   the server side inside the container and 4445 on my local machine
+system("docker run -d -p 4445:4444 selenium/standalone-chrome")
 
 # Access the remote browser
 remDr <- RSelenium::remoteDriver(remoteServerAddr = "localhost",

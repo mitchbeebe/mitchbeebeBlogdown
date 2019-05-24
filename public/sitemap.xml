@@ -3,13 +3,13 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/posts/raspberry-pi-dog-monitor/</loc>
-    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+    <loc>/posts/webcam-image-classification/</loc>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/posts/raspberry-pi-dog-monitor/</loc>
-    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+    <loc>/posts/2019-05-15-webscraping-nhl-data-with-rselenium-part-2/</loc>
+    <lastmod>2019-05-15T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -38,20 +38,32 @@
   </url>
   
   <url>
+    <loc>/tags/image-classification/</loc>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/javascript/</loc>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/</loc>
-    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/nhl/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/posts/</loc>
-    <lastmod>2019-05-13T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -69,13 +81,13 @@
   
   <url>
     <loc>/tags/r/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -93,13 +105,19 @@
   
   <url>
     <loc>/tags/selenium/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/tensorflow/</loc>
+    <lastmod>2019-05-21T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -117,7 +135,7 @@
   
   <url>
     <loc>/tags/webscraping/</loc>
-    <lastmod>2019-05-08T00:00:00+00:00</lastmod>
+    <lastmod>2019-05-15T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

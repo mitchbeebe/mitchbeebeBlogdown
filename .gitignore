@@ -1,3 +1,6 @@
-public/*
-.Rproj.user/
-*.csv
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+public
+blogdown

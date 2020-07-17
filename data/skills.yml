@@ -1,14 +1,14 @@
 name: Programming Skills
 title: Software
 source:
-  - name: [R]
+  - name: [R, SQL]
     stars: 5
     
-  - name: [Python, SQL (Postgres), Hive, Impala]
+  - name: [Python, Hive, Impala]
     stars: 4
 
   - name: [Spark, Bash, Git]
     stars: 3
     
-  - name: [Ruby]
+  - name: [Ruby, Rails, JavaScript]
     stars: 2
